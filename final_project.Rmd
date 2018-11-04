@@ -1,0 +1,42 @@
+---
+title: "final_project"
+author: "Meaghan Townsend"
+date: "November 4, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(haven)
+library(ggplot2)
+
+raw_data <- read_sav("~/Desktop/data/DS0001/33968-0001-Data.sav")
+
+View(raw_data)
+```
+
+```{r}
+quality_social_dev_12 <- raw_data %>%
+  select(ICPSR_CHILD_ID, I_OVERALL_12, ASQSCORE_12) %>%
+  group_by(ICPSR_CHILD_ID) %>%
+  ggplot(aes(x = I_OVERALL_12, y = ASQSCORE_12)) + 
+  geom_point()
+
+quality_social_dev_12
+  
+  
+  
+``` 
+workspace
+```{r}
+  select(ICPSR_CHILD_ID, INCM24, BITSYTOTAL_24, YSAGE24) %>%
+  filter(ICPSR_CHILD_ID <= 242) %>%
+  
+  
+  
+mother.data <- raw.data %>%
+  select(EDUCAT_PK, WORKSTRES_PK, 
+```
+
