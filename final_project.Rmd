@@ -19,16 +19,71 @@ View(raw_data)
 
 ```{r}
 quality_social_dev_12 <- raw_data %>%
-  select(ICPSR_CHILD_ID, I_OVERALL_12, ASQSCORE_12) %>%
-  group_by(ICPSR_CHILD_ID) %>%
+  select(ICPSR_CHILDID, I_OVERALL_12, ASQSCORE_12) %>%
+  filter(!is.na(I_OVERALL_12), !is.na(ASQSCORE_12)) %>%
+  group_by(ICPSR_CHILDID) %>%
+  ggplot(aes(x = I_OVERALL_12, y = ASQSCORE_12)) + 
+  geom_line()
+
+quality_social_dev_12
+
+gender_social_dev_12 <- raw_data %>%
+  select(ICPSR_CHILDID, GENDER_12, ASQSCORE_12) %>%
+  filter(!is.na(GENDER_12)) %>%
+  mutate(GENDER_12 = as.character(GENDER_12),
+         GENDER_12 = fct_recode(GENDER_12, "Female" = "1",
+                                "Male" = "2")) %>%
+  group_by(ICPSR_CHILDID) %>%
+  ggplot(aes(x = GENDER_12, y = ASQSCORE_12)) + 
+  geom_boxplot() + 
+  labs(title = "Gender Has No Significant Impact on Social Development at 12 Months of Age", 
+       x = "Gender",
+       y = "ASQ Score of Social Development")
+
+gender_social_dev_12
+
+dep_social_dev_12 <- raw_data %>%
+  select(ICPSR_CHILDID, DEPRESSION_12, GENDER_12, ASQSCORE_12) %>%
+  filter(!is.na(GENDER_12)) %>%
+  mutate(GENDER_12 = as.character(GENDER_12),
+         GENDER_12 = fct_recode(GENDER_12, "Female" = "1",
+                                "Male" = "2")) %>%
+  group_by(ICPSR_CHILDID) %>%
+  ggplot(aes(x = DEPRESSION_12, y = ASQSCORE_12, color = GENDER_12)) + 
+  geom_point() +
+  scale_color_manual(values = c("pink", "blue"))
+ # labs(title = "Gender Has No Significant Impact on Social Development at 12 Months of Age", 
+      # x = "Gender",
+       #y = "ASQ Score of Social Development")
+
+dep_social_dev_12
+
+View(quality_social_dev_12)
+
+  group_by(ICPSR_CHILDID) %>%
   ggplot(aes(x = I_OVERALL_12, y = ASQSCORE_12)) + 
   geom_point()
 
 quality_social_dev_12
-  
-  
-  
 ``` 
+
+```{r}
+raw.data %>%
+  select(ICPSR_CHILDID, INCOMGROUP_12, I_OVERALL_12) %>%
+  filter(!is.na(INCOMGROUP_12)) %>%
+  mutate(INCOMGROUP_12 = as.character(INCOMGROUP_12),
+         INCOMGROUP_12 = fct_recode(INCOMGROUP_12, "Low income" = "1",
+                                "Moderate income" = "2",
+                                "High income" = "3")) %>%
+  group_by(ICPSR_CHILDID) %>%
+  ggplot(aes(x = INCOMGROUP_12, y = I_OVERALL_12)) +
+  geom_boxplot() +
+  labs(title = "Overall Infant Center Quality Improves with Income Level",
+       x = "Family Income Category",
+       y = "Infant/Toddler Environment Rating Scale (ITERS) Score")
+```
+
+
 workspace
 ```{r}
   select(ICPSR_CHILD_ID, INCM24, BITSYTOTAL_24, YSAGE24) %>%
