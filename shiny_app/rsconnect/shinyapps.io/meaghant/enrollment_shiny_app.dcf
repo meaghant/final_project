@@ -1,0 +1,12 @@
+name: enrollment_shiny_app
+title: enrollment_shiny_app
+username:
+account: meaghant
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 552441
+bundleId: 1681860
+url: https://meaghant.shinyapps.io/enrollment_shiny_app/
+when: 1541381414.57027
+asMultiple: FALSE
+asStatic: FALSE
