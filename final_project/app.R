@@ -4,8 +4,8 @@ library(haven)
 library(dplyr)
 library(ggrepel)
 library(ggplot2)
-library(plotly)
 library(ggpubr)
+library(shinythemes)
 library(tidyverse)
 
 raw_data <- read_sav("33968-0001-Data.sav")
@@ -54,9 +54,11 @@ outcome_choices <- c("PALS Academic Performance Score" = "PALS_PK",
                      "ASQ Behavioral Score (higher = worse behavior)" = "TOTALASQSCORE_PK")
 
 ui <- fluidPage(
+  
+   theme = shinytheme("superhero"),
    
    # Application title
-   titlePanel("Educ Data"),
+   titlePanel("What Effect Do Home Factors have on Preschoolers' Academic and Social Outcomes?"),
    
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
@@ -73,20 +75,45 @@ ui <- fluidPage(
       
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("distPlot")
+        tabsetPanel(type = "tabs",
+                    tabPanel("About this app", htmlOutput("about")),
+                    tabPanel("Data", plotOutput("boxplot")),
+                    tabPanel("Learn more", htmlOutput("learn")))
       )
    )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+   output$about <- renderUI({
+    
+    str1 <- paste("Welcome")
+    str2 <- paste("I examine data from the Massachusetts Early Care and Education and School Readiness Study, which assesses the specific factors in infant and preschool classrooms that promote school readiness.")
+    str3 <- paste("My Focus")
+    str4 <- paste("I was particularly interested in the correlation between non-school factors and children’s performance. I chose to examine the non-school factors of number of books read per week, number of books in the home, and maternal education level. To gauge academic outcomes, I chose the Phonological Awareness and Literacy Screening (PALS) score for ELA performance. To gauge social outcomes, I chose the Stages Questionnaire (ASQ) Score for social development. These variables can all be selected on the left sidebar.")
+    str5 <- paste("Hypotheses")
+    str6 <- paste("I hypothesized that preschool children who (1) are read to a greater number of nights per week, (2) are exposed to a greater number of books in their homes, and (3) have mothers with a higher degree of education will have better academic and social development outcomes.")
+    
+    HTML(paste(h3(str1), p(str2), h3(str3), p(str4), h3(str5), p(str6)))
+  })
    
-   output$distPlot <- renderPlot({
+   output$boxplot <- renderPlot({
      
      clean_data %>% 
        group_by(ICPSR_CENTERID_PK) %>%
        ggplot(aes_string(x = input$characteristic, y = input$outcome)) + geom_boxplot() 
+   })
+   
+   output$learn <- renderUI({
      
+     str3 <- paste("About this study")
+     str4 <- paste("The goal of my project is to identify the best indicators of success both inside and outside of the classroom. In a real world context, this work would hopefully be useful to decision makers in crafting effective child care policies and strategies.")
+     str2 <- paste("Marshall, Nancy, Roberts, Joanne, and Wagner Robeson, Wendy. Massachusetts Early Care and Education and School Readiness Study, 2001-2008. Ann Arbor, MI: Inter-university Consortium for Political and Social Research [distributor], 2013-04-05. https://doi.org/10.3886/ICPSR33968.v1.")
+     str3 <- paste("Please visit")
+     str4 <- paste("The goal of my project is to identify the best indicators of success both inside and outside of the classroom. In a real world context, this work would hopefully be useful to decision makers in crafting effective child care policies and strategies.")
+     
+     HTML(paste(h3(str1), p(str2), h3(str3), p(str4)))
    })
 }
 
