@@ -51,7 +51,7 @@ nonschool_choices <- c("Number of Books in Home" = "NUBOOKSLI_PK",
                        "Maternal Education Level" = "EDUCAT_PK",
                        "Family Income Level" = "INCOMELI_PK")
 
-outcome_choices <- c("PALS Litearcy Score" = "PALS_PK",
+outcome_choices <- c("PALS Literacy Score" = "PALS_PK",
                      "ASQ Social Development Score (higher score = worse behavior)" = "TOTALASQSCORE_PK")
 
 ui <- fluidPage(
