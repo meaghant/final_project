@@ -1,5 +1,4 @@
 library(shiny)
-library(tidytext)
 library(haven)
 library(dplyr)
 library(ggrepel)
@@ -8,64 +7,68 @@ library(ggpubr)
 library(shinythemes)
 library(tidyverse)
 
-raw_data <- read_sav("33968-0001-Data.sav")
+# TO-DO: title and x/y axis labels of graphs
+
+# Read in data
+
+raw_data <- read_sav("MECESR_data.sav")
+
+# To clean the data for later use, I selected the variables I planned to use: the three non-school factor variables, the two outcome variables, and the unique child ID grouping variable.
+# I chose to filter out N/A values because I wanted compare data that was complete on all metrics. I acknowledge that this will leave out certain respondents who, for example, refused to share their income or education level.
+# I mutated the variables to make them easily understandable for the user
 
 clean_data <- raw_data %>%
-  select(ICPSR_CENTERID_PK, RDDAYWKLI_PK, NUBOOKSLI_PK, EDUCAT_PK, PALS_PK, TOTALASQSCORE_PK, INCOMELI_PK) %>%
-  mutate(RDDAYWKLI_PK = as.character(RDDAYWKLI_PK),
-         RDDAYWKLI_PK = fct_recode(RDDAYWKLI_PK, "0" = "0",
-                                   "1" = "1",
-                                   "2" = "2",
-                                   "3" = "3",
-                                   "4" = "4",
-                                   "5" = "5",
-                                   "6" = "6",
-                                   "7" = "7"),
-         NUBOOKSLI_PK = as.character(NUBOOKSLI_PK),
+  select(ICPSR_CENTERID_PK, NUBOOKSLI_PK, EDUCAT_PK, INCOMELI_PK, PALS_PK, TOTALASQSCORE_PK) %>%
+  filter(!is.na(NUBOOKSLI_PK),
+         !is.na(EDUCAT_PK),
+         !is.na(INCOMELI_PK),
+         !is.na(PALS_PK),
+         !is.na(TOTALASQSCORE_PK)) %>%
+  mutate(NUBOOKSLI_PK = as.character(NUBOOKSLI_PK),
          NUBOOKSLI_PK = fct_recode(NUBOOKSLI_PK, "None" = "1",
                                    "1 to 9 books" = "2",
                                    "10 to 24 books" = "3",
                                    "25 to 49 books" = "4",
                                    "50 or more books" = "5"),
          EDUCAT_PK = case_when(EDUCAT_PK %in% 1:2 ~ "High school or less",
-                                 INCOMELI_PK %in% 3:5 ~ "Some college/associate's or technical degree",
-                                 INCOMELI_PK %in% 6:7 ~ "Graduate degree"),
-         EDUCAT_PK = fct_relevel(EDUCAT_PK, c("High school or less", "Some college/associate's or technical degree", "Graduate degree")),
-         PALS_PK = as.numeric(PALS_PK),
-         TOTALASQSCORE_PK = as.numeric(TOTALASQSCORE_PK),
-         INCOMELI_PK = case_when(INCOMELI_PK %in% 1:5 ~ "Under $50,000",
-                                 INCOMELI_PK %in% 6:10 ~ "$50,000-100,000",
-                                 INCOMELI_PK %in% 11 ~ "$100,000-150,000",
-                                 INCOMELI_PK %in% 12 ~ "$150,000-200,000",
-                                 INCOMELI_PK %in% 13 ~ "Over $200,000"),
+                               EDUCAT_PK %in% 3:5 ~ "Some college/non-bachelor's degree",
+                               EDUCAT_PK %in% 6 ~ "Bachelor's degree",
+                               EDUCAT_PK %in% 7 ~ "Graduate degree"),
+         EDUCAT_PK = fct_relevel(EDUCAT_PK, c("High school or less", "Some college/non-bachelor's degree", "Bachelor's degree", "Graduate degree")),
+         INCOMELI_PK = as.character(INCOMELI_PK),
+         INCOMELI_PK = fct_collapse(INCOMELI_PK, "Under $50,000" = c("1","2","3","4","5"),
+                                    "$50,000-100,000" = c("6","7","8","9","10"), 
+                                    "$100,000-150,000" = "11",
+                                    "$150,000-200,000" = "12",
+                                    "Over $200,000" = "13"),
          INCOMELI_PK = fct_relevel(INCOMELI_PK, c("Under $50,000", "$50,000-100,000", "$100,000-150,000", "$150,000-200,000", "Over $200,000")),
-         INCOMELI_PK = as_vector(INCOMELI_PK)) %>%
-  filter(!is.na(RDDAYWKLI_PK),
-         !is.na(NUBOOKSLI_PK),
-         !is.na(EDUCAT_PK),
-         !is.na(PALS_PK),
-         !is.na(TOTALASQSCORE_PK))
+         PALS_PK = as.numeric(PALS_PK),
+         TOTALASQSCORE_PK = as.numeric(TOTALASQSCORE_PK))
 
-characteristic_choices <- c("Number of Books Read Per Week" = "RDDAYWKLI_PK",
-                            "Number of Books in Home" = "NUBOOKSLI_PK",
-                            "Maternal Education Level" = "EDUCAT_PK")
+# Drawing from the problem set 7 solution, I defined input choices for non-school factors and outcome outside of my UI.
 
-outcome_choices <- c("PALS Academic Performance Score" = "PALS_PK",
-                     "ASQ Behavioral Score (higher = worse behavior)" = "TOTALASQSCORE_PK")
+nonschool_choices <- c("Number of Books in Home" = "NUBOOKSLI_PK",
+                       "Maternal Education Level" = "EDUCAT_PK",
+                       "Family Income Level" = "INCOMELI_PK")
+
+outcome_choices <- c("PALS Litearcy Score" = "PALS_PK",
+                     "ASQ Social Development Score (higher score = worse behavior)" = "TOTALASQSCORE_PK")
 
 ui <- fluidPage(
   
+   # I chose a dark navy theme and titled my app.
+  
    theme = shinytheme("superhero"),
    
-   # Application title
-   titlePanel("What Effect Do Home Factors have on Preschoolers' Academic and Social Outcomes?"),
+   titlePanel("What Effect Do Non-School Factors have on Preschoolers' Academic and Social Outcomes?"),
    
-   # Sidebar with a slider input for number of bins 
+   # I created a sidebar with two drop-down menus. The first allows the user to select one of three non-school factors; the second allows the user to select one of two outcome variables.
+   
    sidebarLayout(
      sidebarPanel(
-       selectInput("characteristic",
-                   "Select a characteristic:",
-                   choices = characteristic_choices,
+       selectInput("nonschool",
+                   "Select a non-school factor:",
+                   choices = nonschool_choices,
                    selected = "Number of Books Read Per Week"),
       selectInput("outcome",
                   "Select an outcome variable:",
@@ -73,47 +76,72 @@ ui <- fluidPage(
                    selected = "PALS Academic Score")
      ),
       
-      # Show a plot of the generated distribution
-      mainPanel(
+      # In the main panel, I created several tabs to keep my app looking clean: an "About" tab to introduce the app, an "Explore" tab for the data, a "Takeaways" tab to share my findings, and a "Learn more" tab for anyone interested in doing so.
+      # I wrote up my interpretations of the data and printed it beneath the boxplot in the "Explore" tab.
+      
+     mainPanel(
         tabsetPanel(type = "tabs",
                     tabPanel("About this app", htmlOutput("about")),
-                    tabPanel("Data", plotOutput("boxplot")),
+                    tabPanel("Explore the data", 
+                             plotOutput("boxplot"),
+                             h3("Interpretation of Findings"),
+                             p("My hypotheses largely held true. Across the board, there was a stronger correlation between the non-school factor and the literacy outcome variable than with the social development outcome variable. This is perhaps surprising, given that all of these factors were removed from the classroom."),
+                             h3("Number of Books Read Per Week"),
+                             p("The number of books in the home was positively correlated with literacy outcomes. Preschoolers who came from 50+ book households outscored peers from households with fewer than 9 books by 1.5 standard deviations on the PALS literacy score."),
+                             p("A greater number of books was also correlated, though not as strongly, with improved social development. There were, however, a notable number of poorly-behaved children from households with many books, suggesting that exposure to books does not prevent the instance of poor behavior."),
+                             h3("Maternal Education Level"),
+                             p("Maternal education level had an even stronger positive correlation with improved literacy outcomes. The spread of the data was consistent between educational levels, but the average literacy score improved with each additional level of school completed by the student’s mother."),
+                             p("Children of mothers who completed only high school or less were significantly less well behaved than children of other mothers. However, there were minimal differences in the social development of children whose mothers completed some college or received an associate’s, technical, bachelor’s or graduate degree."),
+                             h3("Family Income Level"),
+                             p("There was also a slight positive correlation between family income level and literacy outcomes. The largest gap was between families with incomes below $50,000 and all other families, whose children all exhibited similar literacy scores."),
+                             p("Finally, children of parents from lower-income families performed less well on scores of social development. Again, a gap emerged between families living on less than $50,000, whose children had the worst social development scores, and other families, whose children performed similarly to each other. Six of the seven worst-behaved children were in the lowest income bracket."),
+                             h3("Implications"),
+                             p("Above a certain threshold – whether number of books in the home, maternal education level, or family income level – children seem to perform at roughly the same level on literacy and social development outcomes. The substantial drop-offs in performance seen at the lowest levels of privilege on each factor might incline policymakers to focus non-school reform efforts towards those most in need.")),
                     tabPanel("Learn more", htmlOutput("learn")))
       )
    )
 )
 
-# Define server logic required to draw a histogram
+# I defined my server logic, producing a different output for each tab.
+
 server <- function(input, output) {
+  
+   # For the "about" tab, I pasted together strings of text describing my project. I created headers and subtext to make it more readable.
   
    output$about <- renderUI({
     
     str1 <- paste("Welcome")
-    str2 <- paste("I examine data from the Massachusetts Early Care and Education and School Readiness Study, which assesses the specific factors in infant and preschool classrooms that promote school readiness.")
+    str2 <- paste("For this project, I examine data from the Massachusetts Early Care and Education and School Readiness Study, which assesses the specific factors inside and outside of infant and preschool classrooms that promote school readiness.")
     str3 <- paste("My Focus")
-    str4 <- paste("I was particularly interested in the correlation between non-school factors and children’s performance. I chose to examine the non-school factors of number of books read per week, number of books in the home, and maternal education level. To gauge academic outcomes, I chose the Phonological Awareness and Literacy Screening (PALS) score for ELA performance. To gauge social outcomes, I chose the Stages Questionnaire (ASQ) Score for social development. These variables can all be selected on the left sidebar.")
+    str4 <- paste("I chose to examine the non-school factors of number of books in the home, maternal education level, and family income level. To gauge literacy outcomes, I chose the Phonological Awareness and Literacy Screening (PALS) score. To gauge behavioral outcomes, I chose the Stages Questionnaire (ASQ) Score for social development. These variables can all be selected on the left sidebar.")
     str5 <- paste("Hypotheses")
-    str6 <- paste("I hypothesized that preschool children who (1) are read to a greater number of nights per week, (2) are exposed to a greater number of books in their homes, and (3) have mothers with a higher degree of education will have better academic and social development outcomes.")
+    str6 <- paste("I hypothesized that preschool children who (1) are exposed to a greater number of books in their homes, (2) have mothers with a higher degree of education, and (3) come from higher-income households will have better literacy and social development outcomes.")
     
     HTML(paste(h3(str1), p(str2), h3(str3), p(str4), h3(str5), p(str6)))
   })
+   
+   # For the data tab, I piped the cleaned data into a boxplot of outcome vs. non-school factors. I chose to visualize these data with boxplots to communicate the spread of each variable. Again drawing from the solutions to problem set 7, I used aes_string instead of aes because selectInput stored both nonschool and outcome as strings. I also grouped by the unique child ID and rotated the x-axis labels by 30 degrees to make them more readable.
    
    output$boxplot <- renderPlot({
      
      clean_data %>% 
        group_by(ICPSR_CENTERID_PK) %>%
-       ggplot(aes_string(x = input$characteristic, y = input$outcome)) + geom_boxplot() 
+       ggplot(aes_string(x = input$nonschool, y = input$outcome)) + geom_boxplot() +
+       theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
    })
+   
+   # For the "learn more" tab, I pasted together strings of text describing my project. I created headers and subtext to make it more readable.
    
    output$learn <- renderUI({
      
-     str3 <- paste("About this study")
-     str4 <- paste("The goal of my project is to identify the best indicators of success both inside and outside of the classroom. In a real world context, this work would hopefully be useful to decision makers in crafting effective child care policies and strategies.")
-     str2 <- paste("Marshall, Nancy, Roberts, Joanne, and Wagner Robeson, Wendy. Massachusetts Early Care and Education and School Readiness Study, 2001-2008. Ann Arbor, MI: Inter-university Consortium for Political and Social Research [distributor], 2013-04-05. https://doi.org/10.3886/ICPSR33968.v1.")
-     str3 <- paste("Please visit")
-     str4 <- paste("The goal of my project is to identify the best indicators of success both inside and outside of the classroom. In a real world context, this work would hopefully be useful to decision makers in crafting effective child care policies and strategies.")
+     str1 <- paste("About the Massachusetts Early Care and Education and School Readiness Study")
+     str2 <- paste("This study was conducted in Massachusetts from 2001 to 2008 by Wellesley College researchers. The study collected data at 12, 24, and 36 months, and in the year before kindergarten. I examine only the pre-kindergarten year data. The average age of the children in the study at this time was 59.79 months, or 4.98 years, with a standard deviation of 4.10 months. Of the 248 families originally recruited for the study, 233 remain. This represents an attrition rate of 3.6%.")
+     str3 <- paste("The study was directed by Wendy Wagner Robeson, Ed.D., Joanne Roberts, Ph.D., and Nancy L. Marshall, Ed.D. Funding was provided by (1) the United States Department of Health and Human Services, Administration for Children and Families, Office of Planning, Research and Evaluation; (2) the United States Department of Health and Human Services, Administration for Children and Families, Office of Child Care; and (3) the Harold Benenson Memorial Research Fund.")
+     str4 <- paste("Citation")
+     str5 <- paste("Marshall, Nancy, Roberts, Joanne, and Wagner Robeson, Wendy. Massachusetts Early Care and Education and School Readiness Study, 2001-2008. Ann Arbor, MI: Inter-university Consortium for Political and Social Research [distributor], 2013-04-05. https://doi.org/10.3886/ICPSR33968.v1.")
      
-     HTML(paste(h3(str1), p(str2), h3(str3), p(str4)))
+     HTML(paste(h3(str1), p(str2), p(str3), h3(str4), p(str5)))
    })
 }
 
