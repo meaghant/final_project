@@ -7,15 +7,13 @@ library(ggpubr)
 library(shinythemes)
 library(tidyverse)
 
-# TO-DO: title and x/y axis labels of graphs
-
 # Read in data
 
 raw_data <- read_sav("MECESR_data.sav")
 
 # To clean the data for later use, I selected the variables I planned to use: the three non-school factor variables, the two outcome variables, and the unique child ID grouping variable.
 # I chose to filter out N/A values because I wanted compare data that was complete on all metrics. I acknowledge that this will leave out certain respondents who, for example, refused to share their income or education level.
-# I mutated the variables to make them easily understandable for the user
+# I mutated the variables to make them easily understandable for the user.
 
 clean_data <- raw_data %>%
   select(ICPSR_CENTERID_PK, NUBOOKSLI_PK, EDUCAT_PK, INCOMELI_PK, PALS_PK, TOTALASQSCORE_PK) %>%
@@ -85,18 +83,8 @@ ui <- fluidPage(
                   tabPanel("Explore the data", 
                            plotOutput("boxplot"),
                            h3("Interpretation of Findings"),
-                           p("My hypotheses largely held true. Across the board, there was a stronger correlation between the non-school factor and the literacy outcome variable than with the social development outcome variable. This is perhaps surprising, given that all of these factors were removed from the classroom."),
-                           h3("Number of Books Read Per Week"),
-                           p("The number of books in the home was positively correlated with literacy outcomes. Preschoolers who came from 50+ book households outscored peers from households with fewer than 9 books by 1.5 standard deviations on the PALS literacy score."),
-                           p("A greater number of books was also correlated, though not as strongly, with improved social development. There were, however, a notable number of poorly-behaved children from households with many books, suggesting that exposure to books does not prevent the instance of poor behavior."),
-                           h3("Maternal Education Level"),
-                           p("Maternal education level had an even stronger positive correlation with improved literacy outcomes. The spread of the data was consistent between educational levels, but the average literacy score improved with each additional level of school completed by the student’s mother."),
-                           p("Children of mothers who completed only high school or less were significantly less well behaved than children of other mothers. However, there were minimal differences in the social development of children whose mothers completed some college or received an associate’s, technical, bachelor’s or graduate degree."),
-                           h3("Family Income Level"),
-                           p("There was also a slight positive correlation between family income level and literacy outcomes. The largest gap was between families with incomes below $50,000 and all other families, whose children all exhibited similar literacy scores."),
-                           p("Finally, children of parents from lower-income families performed less well on scores of social development. Again, a gap emerged between families living on less than $50,000, whose children had the worst social development scores, and other families, whose children performed similarly to each other. Six of the seven worst-behaved children were in the lowest income bracket."),
-                           h3("Implications"),
-                           p("Above a certain threshold – whether number of books in the home, maternal education level, or family income level – children seem to perform at roughly the same level on literacy and social development outcomes. The substantial drop-offs in performance seen at the lowest levels of privilege on each factor might incline policymakers to focus non-school reform efforts towards those most in need.")),
+                           p("My hypotheses largely held true. Across the board, there was a stronger correlation between the non-school factor and the literacy outcome variable than with the social development outcome variable. This is perhaps surprising, given that all of these factors were removed from the classroom.")),
+                  tabPanel("Insights", htmlOutput("insight")),
                   tabPanel("Learn more", htmlOutput("learn")))
     )
   )
@@ -105,6 +93,25 @@ ui <- fluidPage(
 # I defined my server logic, producing a different output for each tab.
 
 server <- function(input, output) {
+  
+  x_label <- reactive({
+    req(input$nonschool)
+    if(input$nonschool == "NUBOOKSLI_PK"){
+      x_label <- "Number of Books in Home"
+    } else if(input$nonschool == "EDUCAT_PK"){
+      x_label <- "Maternal Education Level"
+    } else if(input$nonschool == "INCOMELI_PK"){
+      x_label <- "Family Income Level"
+    }})
+  
+  # create function to reactively change y-axis label
+  y_label <- reactive({
+    req(input$outcome)
+    if(input$outcome == "PALS_PK"){
+      y_label <- "PALS Literacy Score"
+    } else if(input$outcome == "TOTALASQSCORE_PK"){
+      y_label <- "ASQ Social Development Score (higher score = worse behavior)"
+    }})
   
   # For the "about" tab, I pasted together strings of text describing my project. I created headers and subtext to make it more readable.
   
@@ -126,8 +133,29 @@ server <- function(input, output) {
     
     clean_data %>% 
       group_by(ICPSR_CENTERID_PK) %>%
-      ggplot(aes_string(x = input$nonschool, y = input$outcome)) + geom_boxplot() +
+      ggplot(aes_string(x = input$nonschool, y = input$outcome)) + 
+      geom_boxplot() +
+      labs(x = x_label(),
+           y = y_label()) +
       theme(axis.text.x = element_text(angle = 30, hjust = 1))
+    
+  })
+  
+  output$insight <- renderUI({
+    
+    str1 <- paste("Number of Books Read Per Week")
+    str2 <- paste("The number of books in the home was positively correlated with literacy outcomes. Preschoolers who came from 50+ book households outscored peers from households with fewer than 9 books by 1.5 standard deviations on the PALS literacy score.")
+    str3 <- paste("A greater number of books was also correlated, though not as strongly, with improved social development. There were, however, a notable number of poorly-behaved children from households with many books, suggesting that exposure to books does not prevent the instance of poor behavior.")
+    str4 <- paste("Maternal Education Level")
+    str5 <- paste("Maternal education level had an even stronger positive correlation with improved literacy outcomes. The spread of the data was consistent between educational levels, but the average literacy score improved with each additional level of school completed by the student’s mother.")
+    str6 <- paste("Children of mothers who completed only high school or less were significantly less well behaved than children of other mothers. However, there were minimal differences in the social development of children whose mothers completed some college or received an associate’s, technical, bachelor’s or graduate degree.")
+    str7 <- paste("Family Income Level")
+    str8 <- paste("There was also a slight positive correlation between family income level and literacy outcomes. The largest gap was between families with incomes below $50,000 and all other families, whose children all exhibited similar literacy scores.")
+    str9 <- paste("Finally, children of parents from lower-income families performed less well on scores of social development. Again, a gap emerged between families living on less than $50,000, whose children had the worst social development scores, and other families, whose children performed similarly to each other. Six of the seven worst-behaved children were in the lowest income bracket.")
+    str10 <- paste("Implications")
+    str11 <- paste("Above a certain threshold – whether number of books in the home, maternal education level, or family income level – children seem to perform at roughly the same level on literacy and social development outcomes. The substantial drop-offs in performance seen at the lowest levels of privilege on each factor might incline policymakers to focus non-school reform efforts towards those most in need.")
+    
+    HTML(paste(h3(str1), p(str2), p(str3), h3(str4), p(str5), p(str6), h3(str7), p(str8), p(str9), h3(str10), p(str11)))
     
   })
   
