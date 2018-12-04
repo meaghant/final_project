@@ -7,13 +7,14 @@ library(ggpubr)
 library(shinythemes)
 library(tidyverse)
 
-# Read in data
+# Read in data. I chose an abbreviation of the study subject (Massachusetts Early Care and Education and School Readiness) as the name of the sav file.
 
 raw_data <- read_sav("MECESR_data.sav")
 
-# To clean the data for later use, I selected the variables I planned to use: the three non-school factor variables, the two outcome variables, and the unique child ID grouping variable.
-# I chose to filter out N/A values because I wanted compare data that was complete on all metrics. I acknowledge that this will leave out certain respondents who, for example, refused to share their income or education level.
-# I mutated the variables to make them easily understandable for the user.
+# My data was relatively clean and did not require the grouping of multiple data frames, so instead of cleaning the data in a separate file and reading it in with an RDS, I chose to clean the data within this app.
+# I selected the variables I planned to use: the three non-school factor variables, the two outcome variables, and the unique child ID grouping variable. I mutated these variables to make them easily understandable for the user.
+# There were many other non-school factor variables in the data set, such as number of days read to per week, incidence of maternal depression, and number of toys in the household. I limited myself to three non-school factor variables because I did not want the app to present too many options to the user. I selected the three non-school factor variables that I found most interesting.
+# I chose to filter out N/A values because I wanted to compare only data that was complete on all metrics. I acknowledge that this will leave out certain respondents who, for example, refused to share their income or education level.
 
 clean_data <- raw_data %>%
   select(ICPSR_CENTERID_PK, NUBOOKSLI_PK, EDUCAT_PK, INCOMELI_PK, PALS_PK, TOTALASQSCORE_PK) %>%
@@ -50,32 +51,43 @@ nonschool_choices <- c("Number of Books in Home" = "NUBOOKSLI_PK",
                        "Family Income Level" = "INCOMELI_PK")
 
 outcome_choices <- c("PALS Literacy Score" = "PALS_PK",
-                     "ASQ Social Development Score (higher score = worse behavior)" = "TOTALASQSCORE_PK")
+                     "ASQ Social Development Score" = "TOTALASQSCORE_PK")
 
 ui <- fluidPage(
   
-  # I chose a dark navy theme and titled my app.
+  # I chose a dark navy theme and titled my app with a question.
   
   theme = shinytheme("superhero"),
   
   titlePanel("What Effect Do Non-School Factors have on Preschoolers' Literacy and Social Development Outcomes?"),
   
-  # I created a sidebar with two drop-down menus. The first allows the user to select one of three non-school factors; the second allows the user to select one of two outcome variables.
+  # I created a sidebar that allows the user to select one of three non-school factors and one of two outcome variables. 
+  # I elected to use a drop-down menu rather than radio buttons to avoid overcrowding the screen. 
+  # Using Mr. Smith's app as an example, I added descriptions of each variable underneath the drop-down menus to make their meaning transparent to the user.
   
   sidebarLayout(
     sidebarPanel(
       selectInput("nonschool",
                   "Select a non-school factor:",
                   choices = nonschool_choices,
-                  selected = "Number of Books Read Per Week"),
+                  selected = "Number of Books in Home"),
+      
+      tags$h6(helpText("\"Number of Books in Home\" refers to the total number of children's books, including library books, in the respondents' home at time of response.
+                       \"Maternal Education Level\" refers to the reported educational background of the mother.
+                       \"Family Income Level\" refers to the total household income from all sources.")),
+      br(),
+      
       selectInput("outcome",
                   "Select an outcome variable:",
                   choices = outcome_choices,
-                  selected = "PALS Academic Score")
+                  selected = "PALS Literacy Score"),
+      
+      tags$h6(helpText("\"PALS Literacy Score\" refers to a child's score on the Phonological Awareness Literacy Screening test, a widely used measure that gauges ability in areas such as phonological awareness, alphabet recognition, concept of word, knowledge of letter sounds, and spelling.
+                       \"ASQ Social Development Score\" refers to a child's score on the parent-completed Ages and Stages Questionnaire, which evaluates the areas of communication, gross motor skills, fine motor skills, problem solving, and personal-social skills. It should be noted that a higher score on this measure indicates greater incidence of problem behaviors."))
     ),
     
-    # In the main panel, I created several tabs to keep my app looking clean: an "About" tab to introduce the app, an "Explore" tab for the data, a "Takeaways" tab to share my findings, and a "Learn more" tab for anyone interested in doing so.
-    # I wrote up my interpretations of the data and printed it beneath the boxplot in the "Explore" tab.
+    # In the main panel, I created several tabs to keep my app looking clean: an "About" tab to introduce the app, an "Explore" tab for the data, a "Insights" tab to share my interpretations, and a "Learn more" tab for anyone interested in doing so.
+    # I wrote up a very brief summary of my data and printed it beneath the boxplot in the "Explore" tab, but I wanted to preserve the majority of my interpretations of the data for the "Insights" tab. I chose to make this a separate tab to keep the app neat.
     
     mainPanel(
       tabsetPanel(type = "tabs",
@@ -91,6 +103,7 @@ ui <- fluidPage(
 )
 
 # I defined my server logic, producing a different output for each tab.
+# Again following Mr. Smith's example, I created two reactive functions to print different x- and y-axis labels depending on which variables were selected. 
 
 server <- function(input, output) {
   
@@ -104,7 +117,6 @@ server <- function(input, output) {
       x_label <- "Family Income Level"
     }})
   
-  # create function to reactively change y-axis label
   y_label <- reactive({
     req(input$outcome)
     if(input$outcome == "PALS_PK"){
@@ -113,7 +125,8 @@ server <- function(input, output) {
       y_label <- "ASQ Social Development Score (higher score = worse behavior)"
     }})
   
-  # For the "about" tab, I pasted together strings of text describing my project. I created headers and subtext to make it more readable.
+  # In the "About" tab, I pasted together strings of text describing my project and created headers and subtext to make it more readable.
+  # The sentences are an adaptation of my one- and four-sentence summaries, followed by the hypotheses that drove my exploration of this data.
   
   output$about <- renderUI({
     
@@ -127,7 +140,8 @@ server <- function(input, output) {
     HTML(paste(h3(str1), p(str2), h3(str3), p(str4), h3(str5), p(str6)))
   })
   
-  # For the data tab, I piped the cleaned data into a boxplot of outcome vs. non-school factors. I chose to visualize these data with boxplots to communicate the spread of each variable. Again drawing from the solutions to problem set 7, I used aes_string instead of aes because selectInput stored both nonschool and outcome as strings. I also grouped by the unique child ID and rotated the x-axis labels by 30 degrees to make them more readable.
+  # In the "Data" tab, I piped the cleaned data into a boxplot of outcome vs. non-school factors. I chose to visualize these data with boxplots to communicate the spread of each variable. 
+  # Again drawing from the solutions to problem set 7, I used aes_string instead of aes because selectInput stored both nonschool and outcome as strings. I also grouped by the unique child ID and rotated the x-axis labels by 30 degrees to make them more readable.
   
   output$boxplot <- renderPlot({
     
@@ -140,6 +154,8 @@ server <- function(input, output) {
       theme(axis.text.x = element_text(angle = 30, hjust = 1))
     
   })
+  
+  # In the "Insights" tab, I followed a similar approach to that of the "About" tab. In addition to studying the boxplots, my interpretations of the data were informed by examining the study codebook (included in my Github repo). I tried to be thorough but not excessively long in my interpretations.
   
   output$insight <- renderUI({
     
@@ -159,7 +175,7 @@ server <- function(input, output) {
     
   })
   
-  # For the "learn more" tab, I pasted together strings of text describing my project. I created headers and subtext to make it more readable.
+  # In the "Learn more" tab, I again pasted together strings of text. I wanted to share more about the study from which my data was drawn and give credit to the researchers whose data I was using.
   
   output$learn <- renderUI({
     
