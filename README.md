@@ -6,7 +6,7 @@ Although early childhood education plays a tremendously important role in shapin
 
 ### Data Source
 
-I drew data from the Massachusetts Early Care and Education and School Readiness Study, available [here] (https://doi.org/10.3886/ICPSR33968.v1). This study, conducted from 2001 to 2008 by a team of Wellesley reseachers, assesses the specific factors inside and outside of preschool classrooms that promote school readiness.
+I drew data from the Massachusetts Early Care and Education and School Readiness Study, available at https://doi.org/10.3886/ICPSR33968.v1. This study, conducted from 2001 to 2008 by a team of Wellesley reseachers, assesses the specific factors inside and outside of preschool classrooms that promote school readiness.
 
 ### Hypotheses and Variables
 
