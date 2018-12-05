@@ -7,7 +7,7 @@ library(ggpubr)
 library(shinythemes)
 library(tidyverse)
 
-# Read in data. I chose an abbreviation of the study subject (Massachusetts Early Care and Education and School Readiness) as the name of the sav file.
+# Read in data. I chose an abbreviation of the study (Massachusetts Early Care and Education and School Readiness -> MECESR) as the name of the sav file.
 
 raw_data <- read_sav("MECESR_data.sav")
 
@@ -95,8 +95,8 @@ ui <- fluidPage(
                   tabPanel("Explore the data", 
                            plotOutput("boxplot"),
                            h3("Interpretation of Findings"),
-                           p("My hypotheses largely held true. Across the board, there was a stronger correlation between the non-school factor and the literacy outcome variable than with the social development outcome variable. This is perhaps surprising, given that all of these factors were removed from the classroom.")),
-                  tabPanel("Insights", htmlOutput("insight")),
+                           p("My hypotheses largely held true. Generally, with increases in number of household books, maternal education level, and family income level, there was an improvement in both literacy and social development outcomes, although this plateaued somewhat at the higher levels of privilege in each factor. Suprisingly, there was a stronger correlation between the non-school factor and the literacy outcome variable than with the social development outcome variable. This is perhaps surprising, given that all of these factors were removed from the classroom.")),
+                  tabPanel("Insights", htmlOutput("insight")), 
                   tabPanel("Learn more", htmlOutput("learn")))
     )
   )
@@ -130,10 +130,10 @@ server <- function(input, output) {
   
   output$about <- renderUI({
     
-    str1 <- paste("Welcome")
-    str2 <- paste("For this project, I examine data from the Massachusetts Early Care and Education and School Readiness Study, which assesses the specific factors inside and outside of infant and preschool classrooms that promote school readiness.")
+    str1 <- paste("Did you know...")
+    str2 <- paste("...that non-school factors like parental education and income have more of an impact on preschoolers’ academic outcomes than their behavioral outcomes?")
     str3 <- paste("My Focus")
-    str4 <- paste("I chose to examine the non-school factors of number of books in the home, maternal education level, and family income level. To gauge literacy outcomes, I chose the Phonological Awareness and Literacy Screening (PALS) score. To gauge behavioral outcomes, I chose the Ages and Stages Questionnaire (ASQ) Score for social development. These variables can all be selected on the left sidebar.")
+    str4 <- paste("I drew data from the Massachusetts Early Care and Education and School Readiness Study, which assesses the specific factors inside and outside of preschool classrooms that promote school readiness. I examined three non-school factors: number of books in the home, maternal education level, and family income level, and compared their effects on two outcome variables: literacy and social development. There was a stronger correlation between all three non-school factors and literacy outcomes than with social development outcomes. The substantial drop-offs in performance seen at the lowest levels of privilege on each non-school factor suggest a need for early education reform efforts directed towards those most in need.")
     str5 <- paste("Hypotheses")
     str6 <- paste("I hypothesized that preschool children who (1) are exposed to a greater number of books in their homes, (2) have mothers with a higher degree of education, and (3) come from higher-income households will have better literacy and social development outcomes.")
     
@@ -176,6 +176,7 @@ server <- function(input, output) {
   })
   
   # In the "Learn more" tab, I again pasted together strings of text. I wanted to share more about the study from which my data was drawn and give credit to the researchers whose data I was using.
+  # I also included a link to the data.
   
   output$learn <- renderUI({
     
@@ -183,9 +184,10 @@ server <- function(input, output) {
     str2 <- paste("This study was conducted in Massachusetts from 2001 to 2008 by Wellesley College researchers. The study collected data at 12, 24, and 36 months, and in the year before kindergarten. I examine only the pre-kindergarten year data. The average age of the children in the study at this time was 59.79 months, or 4.98 years, with a standard deviation of 4.10 months. Of the 248 families originally recruited for the study, 233 remain. This represents an attrition rate of 3.6%.")
     str3 <- paste("The study was directed by Wendy Wagner Robeson, Ed.D., Joanne Roberts, Ph.D., and Nancy L. Marshall, Ed.D. Funding was provided by (1) the United States Department of Health and Human Services, Administration for Children and Families, Office of Planning, Research and Evaluation; (2) the United States Department of Health and Human Services, Administration for Children and Families, Office of Child Care; and (3) the Harold Benenson Memorial Research Fund.")
     str4 <- paste("Citation")
-    str5 <- paste("Marshall, Nancy, Roberts, Joanne, and Wagner Robeson, Wendy. Massachusetts Early Care and Education and School Readiness Study, 2001-2008. Ann Arbor, MI: Inter-university Consortium for Political and Social Research [distributor], 2013-04-05. https://doi.org/10.3886/ICPSR33968.v1.")
+    str5 <- paste("Marshall, Nancy, Roberts, Joanne, and Wagner Robeson, Wendy. Massachusetts Early Care and Education and School Readiness Study, 2001-2008. Ann Arbor, MI: Inter-university Consortium for Political and Social Research [distributor], 2013-04-05.")
+    str6 <- a("https://doi.org/10.3886/ICPSR33968.v1.", href = "https://doi.org/10.3886/ICPSR33968.v1")
     
-    HTML(paste(h3(str1), p(str2), p(str3), h3(str4), p(str5)))
+    HTML(paste(h3(str1), p(str2), p(str3), h3(str4), p(str5), p(str6)))
   })
 }
 
