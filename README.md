@@ -14,7 +14,7 @@ I hypothesized that preschool children who (1) are exposed to a greater number o
 
 ### Findings and Implications
 
-There was a stronger correlation between all three non-school factors and literacy outcomes than with social development outcomes. This is perhaps surprising, given that the three factors I examined are all outside of the classroom and might thus be thought to play more of a role in a child's behavioral rather than academic development. The substantial drop-offs in performance seen at the lowest levels of privilege on each non-school factor suggest a need for non-school reform efforts directed towards those most in need. 
+There was a stronger correlation between all three non-school factors and literacy outcomes than with social development outcomes. This is perhaps surprising, given that the three factors I examined are all outside of the classroom and might thus be thought to play more of a role in a child's behavioral rather than academic development. The substantial drop-offs in performance seen at the lowest levels of privilege on each non-school factor suggest a need for non-school early childhood reform efforts directed towards those most in need. 
 
 I thank you for taking the time to examine this project and hope you find it rewarding. Below please find the link to my app.
 
