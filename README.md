@@ -4,9 +4,9 @@
 
 Although early childhood education plays a tremendously important role in shaping a child's academic and social development, there are a number of factors outside the classroom that have a major influence on children's academic and behavioral development. I was most interested in these non-school factors. I examined three non-school factors: number of books in the home, maternal education level, and family income level, and compared their effects on two outcome variables: literacy and social development. 
 
-### Data Source
+### Background
 
-I drew data from the Massachusetts Early Care and Education and School Readiness Study, available at https://doi.org/10.3886/ICPSR33968.v1. This study, conducted from 2001 to 2008 by a team of Wellesley reseachers, assesses the specific factors inside and outside of preschool classrooms that promote school readiness.
+I drew data from the Massachusetts Early Care and Education and School Readiness Study, available at https://doi.org/10.3886/ICPSR33968.v1. This study, conducted from 2001 to 2008 by a team of Wellesley reseachers, assesses the specific factors inside and outside of preschool classrooms that promote school readiness. This New York Times article offers an eloquent and cohesive description of the socioeconomic gaps that persist outside of and influence early childhood education: https://opinionator.blogs.nytimes.com/2013/04/27/no-rich-child-left-behind/?_r=0.
 
 ### Hypotheses and Variables
 
@@ -18,7 +18,7 @@ There was a stronger correlation between all three non-school factors and litera
 
 I thank you for taking the time to examine this project and hope you find it rewarding. Below please find the link to my app.
 
-- Meaghan Townsend
+-Meaghan Townsend
 
 https://meaghant.shinyapps.io/final_project/
 
