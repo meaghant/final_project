@@ -1,0 +1,12 @@
+name: preschool_outcomes
+title: preschool_outcomes
+username:
+account: meaghant
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 604278
+bundleId: 1741193
+url: https://meaghant.shinyapps.io/preschool_outcomes/
+when: 1543978028.06642
+asMultiple: FALSE
+asStatic: FALSE
