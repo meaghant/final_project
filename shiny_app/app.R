@@ -14,7 +14,7 @@ raw_data <- read_sav("MECESR_data.sav")
 # My data was relatively clean and did not require the grouping of multiple data frames, so instead of cleaning the data in a separate file and reading it in with an RDS, I chose to clean the data within this app.
 # I selected the variables I planned to use: the three non-school factor variables (four after revision), the two outcome variables, and the unique child ID grouping variable. I mutated these variables to make them easily understandable for the user.
 # There were many other non-school factor variables in the data set, such as incidence of maternal depression and number of toys in the household. I originally limited myself to three non-school factor variables because I did not want the app to present too many options to the user. 
-# However, after demo day, I added in another non-school variable, number of days read to per week, based on feedback that people were interested in additional variables! I selected the four non-school factor variables that I found most interesting.
+# However, after demo day, I added in another non-school variable, number of days read to per week, based on the feedback that people were interested in additional variables! I selected the four non-school factor variables that I found most interesting.
 # I chose to filter out N/A values because I wanted to compare only data that was complete on all metrics. I acknowledge that this will leave out certain respondents who, for example, refused to share their income or education level.
 
 clean_data <- raw_data %>%
